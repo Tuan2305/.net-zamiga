@@ -4,7 +4,14 @@ using Pomelo.EntityFrameworkCore.MySql;
 using api.Interfaces;
 using api.Services;
 using api.Repository;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using api.Models;
+
 var builder = WebApplication.CreateBuilder(args);
+
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -25,6 +32,25 @@ builder.Services.AddDbContext<ApplicationDBContext>(options =>
     );
 });
 
+builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
+{
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireNonAlphanumeric = true;
+    options.Password.RequiredLength = 12;
+})
+.AddEntityFrameworkStores<ApplicationDBContext>();
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme =
+    options.DefaultChallengeScheme =
+    options.DefaultForbidScheme =
+    options.DefaultScheme =
+    options.DefaultSignInScheme =
+    options.DefaultSignOutScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

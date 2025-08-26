@@ -4,16 +4,18 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using api.Models;
-
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 namespace api.Data
 {
-    public class ApplicationDBContext : DbContext
-    {
-        public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options)
-            : base(options)
+    public class ApplicationDBContext : IdentityDbContext<AppUser>
+{
+    public ApplicationDBContext(DbContextOptions dbContextOptions)
+        : base(dbContextOptions)
         {
 
         }
+
 
         public DbSet<Stock> Stocks { get; set; }
         public DbSet<Comment> Comments { get; set; }

@@ -9,25 +9,33 @@ using api.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using api.Interfaces;
+using api.Helpers;
 
 namespace api.Controllers
+
+
 {
     [Route("api/stock")]
     [ApiController]
     public class StockController : ControllerBase
     {
         private readonly ApplicationDBContext _context;
+        private readonly IStockRepository _stockRepo;
 
-        public StockController(ApplicationDBContext context)
+        public StockController(ApplicationDBContext context, IStockRepository stockRepo)
         {
             _context = context;
+            _stockRepo = stockRepo;
         }
 
         [HttpGet]
         // [Authorize]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] QueryObject query)
         {
-            var stocks = await _context.Stocks.ToListAsync();
+            if(!ModelState.IsValid)
+                return BadRequest(ModelState);  
+            var stocks = await _stockRepo.GetAllAsync(query);
             var stockDtos = stocks.Select(stock => stock.ToStockDto());
 
             return Ok(stocks);
