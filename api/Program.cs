@@ -42,6 +42,7 @@ builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 })
 .AddEntityFrameworkStores<ApplicationDBContext>();
 
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme =
@@ -50,7 +51,23 @@ builder.Services.AddAuthentication(options =>
     options.DefaultScheme =
     options.DefaultSignInScheme =
     options.DefaultSignOutScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer();
+}).AddJwtBearer(options => 
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(
+            System.Text.Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SigningKey"])
+            ),
+        ClockSkew = TimeSpan.Zero
+    }
+
+);
+builder.Services.AddScoped<ITokenService, TokenService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -62,6 +79,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapControllers(); // Moved before app.Run()
 
 
